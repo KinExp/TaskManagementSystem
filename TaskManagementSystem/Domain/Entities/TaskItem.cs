@@ -7,7 +7,7 @@ namespace TaskManagement.Domain.Entities
         public string Title { get; private set; } = null!;
         public string? Description { get; private set; }
 
-        public TaskState Status { get; private set; } = TaskState.New;
+        public TaskState State { get; private set; } = TaskState.New;
         public TaskPriority Priority { get; private set; } = TaskPriority.Medium;
 
         public DateTime? Deadline { get; private set; }
@@ -32,12 +32,12 @@ namespace TaskManagement.Domain.Entities
 
         public void MarkInProgress()
         {
-            Status = TaskState.InProgress;
+            State = TaskState.InProgress;
         }
 
         public void MarkCompleted()
         {
-            Status = TaskState.Completed;
+            State = TaskState.Completed;
         }
     }
 }
