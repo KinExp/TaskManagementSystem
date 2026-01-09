@@ -38,6 +38,8 @@ public class Program
             DbInitializer.Seed(dbContext);
         }
 
+        app.UseMiddleware<ExceptionMiddleware>();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
