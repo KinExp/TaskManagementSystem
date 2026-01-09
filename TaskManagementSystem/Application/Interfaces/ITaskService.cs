@@ -6,6 +6,8 @@ namespace TaskManagement.Application.Interfaces
     {
         Task<TaskDto> CreateAsync(Guid userId, CreateTaskDto dto);
         Task<IReadOnlyList<TaskDto>> GetByUserAsync(Guid userId);
-        Task CompleteAsync(Guid taskId);
+
+        Task<bool> MarkInProgressAsync(Guid taskId);
+        Task<bool> CompleteAsync(Guid taskId);
     }
 }

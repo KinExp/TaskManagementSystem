@@ -38,16 +38,28 @@ namespace TaskManagement.Application.Services
                 .ToList();
         }
 
-        public async Task CompleteAsync(Guid taskId)
+        public async Task<bool> MarkInProgressAsync(Guid taskId)
         {
             var task = await _taskRepository.GetByIdAsync(taskId);
+            if (task == null)
+                return false;
 
-            if (task is null)
-                throw new InvalidOperationException("Task not found");
+            task.MarkInProgress();
+            await _taskRepository.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> CompleteAsync(Guid taskId)
+        {
+            var task = await _taskRepository.GetByIdAsync(taskId);
+            if (task == null)
+                return false;
 
             task.MarkCompleted();
-
             await _taskRepository.SaveChangesAsync();
+
+            return true;
         }
 
         private static TaskDto MapToDto(TaskItem task)
