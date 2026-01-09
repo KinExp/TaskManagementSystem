@@ -30,6 +30,11 @@ namespace TaskManagement.Domain.Entities
             Deadline = deadline;
         }
 
+        public void UpdateTitle(string title) => Title = title;
+        public void UpdateDescription(string? description) => Description = description;
+        public void UpdatePriority(TaskPriority priority) => Priority = priority;
+        public void UpdateDeadline(DateTime? deadline) => Deadline = deadline;
+
         public void MarkInProgress()
         {
             if (State == TaskState.Completed)

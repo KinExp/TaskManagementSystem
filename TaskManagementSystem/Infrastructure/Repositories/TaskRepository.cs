@@ -48,6 +48,18 @@ namespace TaskManagement.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task UpdateAsync(TaskItem task)
+        {
+            _context.Tasks.Update(task);
+            await Task.CompletedTask;
+        }
+
+        public async Task RemoveAsync(TaskItem task)
+        {
+            _context.Tasks.Remove(task);
+            await Task.CompletedTask;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

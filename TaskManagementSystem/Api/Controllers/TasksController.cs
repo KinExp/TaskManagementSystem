@@ -42,6 +42,36 @@ namespace TaskManagement.Api.Controllers
         }
 
         /// <summary>
+        /// Обновить задачу
+        /// </summary>
+        [HttpPut("{taskId}")]
+        public async Task<IActionResult> Update(
+            Guid taskId,
+            [FromBody] CreateTaskDto dto)
+        {
+            var success = await _taskService.UpdateAsync(
+                taskId,
+                dto.Title,
+                dto.Description,
+                dto.Priority,
+                dto.Deadline);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{taskId}")]
+        public async Task<IActionResult> Delete(Guid taskId)
+        {
+            var success = await _taskService.DeleteAsync(taskId);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        /// <summary>
         /// Отметить задачу как "InProgress"
         /// </summary>
         [HttpPost("{taskId}/inprogress")]

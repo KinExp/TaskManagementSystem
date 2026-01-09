@@ -12,6 +12,9 @@ namespace TaskManagement.Application.Interfaces.Repositories
             Guid userId,
             TaskState? state,
             TaskPriority? priority);
+
+        Task UpdateAsync(TaskItem task);
+        Task RemoveAsync(TaskItem task);
         Task SaveChangesAsync();
     }
 }

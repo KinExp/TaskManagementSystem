@@ -56,6 +56,50 @@ namespace TaskManagement.Application.Services
                 .ToList();
         }
 
+        public async Task<bool> UpdateAsync(
+            Guid taskId,
+            string? title,
+            string? description,
+            TaskPriority? priority,
+            DateTime? deadline)
+        {
+            var task = await _taskRepository.GetByIdAsync(taskId);
+            if (task == null) 
+                return false;
+
+            if (deadline.HasValue && deadline.Value < DateTime.UtcNow)
+                throw new InvalidOperationException("Deadline cannot be in the past");
+
+            if (!string.IsNullOrWhiteSpace(title))
+                task.UpdateTitle(title);
+
+            if (description != null) 
+                task.UpdateDescription(description);
+
+            if (priority.HasValue)
+                task.UpdatePriority(priority.Value);
+
+            if (deadline.HasValue)
+                task.UpdateDeadline(deadline.Value);
+
+            await _taskRepository.UpdateAsync(task);
+            await _taskRepository.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(Guid taskId)
+        {
+            var task = await _taskRepository.GetByIdAsync(taskId);
+            if (task == null) 
+                return false;
+
+            await _taskRepository.RemoveAsync(task);
+            await _taskRepository.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<bool> MarkInProgressAsync(Guid taskId)
         {
             var task = await _taskRepository.GetByIdAsync(taskId);
