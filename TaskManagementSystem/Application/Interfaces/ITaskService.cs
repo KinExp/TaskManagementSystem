@@ -1,4 +1,5 @@
 ﻿using TaskManagement.Application.DTOs;
+using TaskManagement.Domain.Enums;
 
 namespace TaskManagement.Application.Interfaces
 {
@@ -6,6 +7,10 @@ namespace TaskManagement.Application.Interfaces
     {
         Task<TaskDto> CreateAsync(Guid userId, CreateTaskDto dto);
         Task<IReadOnlyList<TaskDto>> GetByUserAsync(Guid userId);
+        Task<IReadOnlyList<TaskDto>> GetByUserAsync(
+            Guid userId,
+            TaskState? state = null,
+            TaskPriority? priority = null);
 
         Task<bool> MarkInProgressAsync(Guid taskId);
         Task<bool> CompleteAsync(Guid taskId);

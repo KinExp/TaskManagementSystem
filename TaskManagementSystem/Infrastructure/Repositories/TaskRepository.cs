@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Domain.Entities;
+using TaskManagement.Domain.Enums;
 using TaskManagement.Infrastructure.Data;
 
 namespace TaskManagement.Infrastructure.Repositories
@@ -29,6 +30,22 @@ namespace TaskManagement.Infrastructure.Repositories
             return await _context.Tasks
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<TaskItem>> GetByUserAsync(
+            Guid userId,
+            TaskState? state,
+            TaskPriority? priority)
+        {
+            var query = _context.Tasks.Where(t => t.UserId == userId);
+
+            if (state.HasValue)
+                query = query.Where(t => t.State == state.Value);
+
+            if (priority.HasValue)
+                query = query.Where(t => t.Priority == priority.Value);
+
+            return await query.ToListAsync();
         }
 
         public async Task SaveChangesAsync()

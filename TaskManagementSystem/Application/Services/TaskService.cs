@@ -2,6 +2,7 @@
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Domain.Entities;
+using TaskManagement.Domain.Enums;
 
 namespace TaskManagement.Application.Services
 {
@@ -37,6 +38,18 @@ namespace TaskManagement.Application.Services
         public async Task<IReadOnlyList<TaskDto>> GetByUserAsync(Guid userId)
         {
             var tasks = await _taskRepository.GetByUserAsync(userId);
+
+            return tasks
+                .Select(MapToDto)
+                .ToList();
+        }
+
+        public async Task<IReadOnlyList<TaskDto>> GetByUserAsync(
+            Guid userId,
+            TaskState? state = null,
+            TaskPriority? priority = null)
+        {
+            var tasks = await _taskRepository.GetByUserAsync(userId, state, priority);
 
             return tasks
                 .Select(MapToDto)

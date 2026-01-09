@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskManagement.Application.DTOs;
 using TaskManagement.Application.Interfaces;
+using TaskManagement.Domain.Enums;
 
 namespace TaskManagement.Api.Controllers
 {
@@ -31,9 +32,12 @@ namespace TaskManagement.Api.Controllers
         /// Получить все задачи пользователя
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<TaskDto>>> GetByUser([FromQuery] Guid userId)
+        public async Task<ActionResult<IReadOnlyList<TaskDto>>> GetByUser(
+            [FromQuery] Guid userId,
+            [FromQuery] TaskState? state = null,
+            [FromQuery] TaskPriority? priority = null)
         {
-            var tasks = await _taskService.GetByUserAsync(userId);
+            var tasks = await _taskService.GetByUserAsync(userId, state, priority);
             return Ok(tasks);
         }
 
