@@ -16,6 +16,11 @@ namespace TaskManagement.Application.Services
 
         public async Task<TaskDto> CreateAsync(Guid userId, CreateTaskDto dto)
         {
+            if (dto.Deadline.HasValue && dto.Deadline.Value < DateTime.UtcNow)
+            {
+                throw new InvalidOperationException("Deadline cannot be in the past");
+            }
+
             var task = new TaskItem(
                 title: dto.Title,
                 userId: userId,

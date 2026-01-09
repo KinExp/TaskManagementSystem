@@ -32,11 +32,17 @@ namespace TaskManagement.Domain.Entities
 
         public void MarkInProgress()
         {
+            if (State == TaskState.Completed)
+                throw new InvalidOperationException("Cannot mark a completed task as InProgress");
+
             State = TaskState.InProgress;
         }
 
         public void MarkCompleted()
         {
+            if (State == TaskState.Completed)
+                throw new InvalidOperationException("Task is already completed");
+
             State = TaskState.Completed;
         }
     }
