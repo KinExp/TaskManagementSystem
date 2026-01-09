@@ -32,6 +32,12 @@ public class Program
 
         var app = builder.Build();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            DbInitializer.Seed(dbContext);
+        }
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
