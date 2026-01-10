@@ -4,6 +4,8 @@ using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Application.Services;
 using TaskManagement.Infrastructure.Data;
 using TaskManagement.Infrastructure.Repositories;
+using TaskManagement.Application.Interfaces.Services;
+using TaskManagement.Infrastructure.Auth;
 
 namespace TaskManagement.Api;
 
@@ -29,6 +31,7 @@ public class Program
 
         // Services
         builder.Services.AddScoped<ITaskService, TaskService>();
+        builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         var app = builder.Build();
 
