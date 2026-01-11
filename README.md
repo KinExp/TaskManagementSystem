@@ -18,5 +18,8 @@ The solution is structured into independent layers:
 - All task operations are scoped to the authenticated user
 - Users can only access and modify their own tasks
 
+## Error Handling
+The API uses centralized exception handling middleware to convert application and domain exceptions into consistent HTTP error responses.
+
 ## Status
 The project is under active development.

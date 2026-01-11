@@ -1,4 +1,5 @@
 ﻿using TaskManagement.Application.DTOs;
+using TaskManagement.Application.Exceptions;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Domain.Entities;
@@ -18,9 +19,7 @@ namespace TaskManagement.Application.Services
         public async Task<TaskDto> CreateAsync(Guid userId, CreateTaskDto dto)
         {
             if (dto.Deadline.HasValue && dto.Deadline.Value < DateTime.UtcNow)
-            {
-                throw new InvalidOperationException("Deadline cannot be in the past");
-            }
+                throw new ValidationException("Deadline cannot be in the past");
 
             var task = new TaskItem(
                 title: dto.Title,
@@ -56,7 +55,7 @@ namespace TaskManagement.Application.Services
                 .ToList();
         }
 
-        public async Task<bool> UpdateAsync(
+        public async Task UpdateAsync(
             Guid userId,
             Guid taskId,
             string? title,
@@ -66,10 +65,10 @@ namespace TaskManagement.Application.Services
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null) 
-                return false;
+                throw new NotFoundException("Task not found");
 
             if (deadline.HasValue && deadline.Value < DateTime.UtcNow)
-                throw new InvalidOperationException("Deadline cannot be in the past");
+                throw new ValidationException("Deadline cannot be in the past");
 
             if (!string.IsNullOrWhiteSpace(title))
                 task.UpdateTitle(title);
@@ -85,44 +84,36 @@ namespace TaskManagement.Application.Services
 
             await _taskRepository.UpdateAsync(task);
             await _taskRepository.SaveChangesAsync();
-
-            return true;
         }
 
-        public async Task<bool> DeleteAsync(Guid userId, Guid taskId)
+        public async Task DeleteAsync(Guid userId, Guid taskId)
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null) 
-                return false;
+                throw new NotFoundException("Task not found");
 
             await _taskRepository.RemoveAsync(task);
             await _taskRepository.SaveChangesAsync();
-
-            return true;
         }
 
-        public async Task<bool> MarkInProgressAsync(Guid userId, Guid taskId)
+        public async Task MarkInProgressAsync(Guid userId, Guid taskId)
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null)
-                return false;
+                throw new NotFoundException("Task not found");
 
             task.MarkInProgress();
             await _taskRepository.SaveChangesAsync();
-
-            return true;
         }
 
-        public async Task<bool> CompleteAsync(Guid userId, Guid taskId)
+        public async Task CompleteAsync(Guid userId, Guid taskId)
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null)
-                return false;
+                throw new NotFoundException("Task not found");
 
             task.MarkCompleted();
             await _taskRepository.SaveChangesAsync();
-
-            return true;
         }
 
         private static TaskDto MapToDto(TaskItem task)

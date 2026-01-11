@@ -12,16 +12,16 @@ namespace TaskManagement.Application.Interfaces
             TaskState? state = null,
             TaskPriority? priority = null);
 
-        Task<bool> UpdateAsync(
+        Task UpdateAsync(
             Guid userId,
             Guid taskId,
             string? title,
             string? description,
             TaskPriority? priority,
             DateTime? deadline);
-        Task<bool> DeleteAsync(Guid userId, Guid taskId);
+        Task DeleteAsync(Guid userId, Guid taskId);
 
-        Task<bool> MarkInProgressAsync(Guid userId, Guid taskId);
-        Task<bool> CompleteAsync(Guid userId, Guid taskId);
+        Task MarkInProgressAsync(Guid userId, Guid taskId);
+        Task CompleteAsync(Guid userId, Guid taskId);
     }
 }

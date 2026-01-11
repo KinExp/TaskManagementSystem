@@ -65,16 +65,13 @@ namespace TaskManagement.Api.Controllers
         {
             var userId = GetUserId();
 
-            var success = await _taskService.UpdateAsync(
+            await _taskService.UpdateAsync(
                 userId,
                 taskId,
                 dto.Title,
                 dto.Description,
                 dto.Priority,
                 dto.Deadline);
-
-            if (!success)
-                return NotFound();
 
             return NoContent();
         }
@@ -84,9 +81,7 @@ namespace TaskManagement.Api.Controllers
         {
             var userId = GetUserId();
 
-            var success = await _taskService.DeleteAsync(userId, taskId);
-            if (!success)
-                return NotFound();
+            await _taskService.DeleteAsync(userId, taskId);
 
             return NoContent();
         }
@@ -99,9 +94,8 @@ namespace TaskManagement.Api.Controllers
         {
             var userId = GetUserId();
 
-            var success = await _taskService.MarkInProgressAsync(userId, taskId);
-            if (!success)
-                return NotFound();
+            await _taskService.MarkInProgressAsync(userId, taskId);
+            
             return NoContent();
         }
 
@@ -113,9 +107,8 @@ namespace TaskManagement.Api.Controllers
         {
             var userId = GetUserId();
 
-            var success = await _taskService.CompleteAsync(userId, taskId);
-            if (!success)
-                return NotFound();
+            await _taskService.CompleteAsync(userId, taskId);
+            
             return NoContent();
         }
     }

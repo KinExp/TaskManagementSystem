@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskManagement.Api.Middleware;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Application.Services;
@@ -93,8 +94,8 @@ public class Program
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             DbInitializer.Seed(dbContext);
         }
-
-        app.UseMiddleware<ExceptionMiddleware>();
+        
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         if (app.Environment.IsDevelopment())
         {
