@@ -6,6 +6,7 @@ using TaskManagement.Domain.Enums;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FluentValidation;
 
 namespace TaskManagement.Api.Controllers
 {
@@ -15,10 +16,14 @@ namespace TaskManagement.Api.Controllers
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;
+        private readonly IValidator<CreateTaskDto> _createValidator;
 
-        public TasksController(ITaskService taskService)
+        public TasksController(
+            ITaskService taskService,
+            IValidator<CreateTaskDto> createValidator)
         {
             _taskService = taskService;
+            _createValidator = createValidator;
         }
 
         private Guid GetUserId()
@@ -35,6 +40,8 @@ namespace TaskManagement.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<TaskDto>> Create([FromBody] CreateTaskDto dto)
         {
+            await ValidateAsync(dto);
+            
             var userId = GetUserId();
             var task = await _taskService.CreateAsync(userId, dto);
 
@@ -63,6 +70,8 @@ namespace TaskManagement.Api.Controllers
             Guid taskId,
             [FromBody] CreateTaskDto dto)
         {
+            await ValidateAsync(dto);
+
             var userId = GetUserId();
 
             await _taskService.UpdateAsync(
@@ -110,6 +119,19 @@ namespace TaskManagement.Api.Controllers
             await _taskService.CompleteAsync(userId, taskId);
             
             return NoContent();
+        }
+
+        private async Task ValidateAsync(CreateTaskDto dto)
+        {
+            var result = await _createValidator.ValidateAsync(dto);
+
+            if (!result.IsValid)
+            {
+                var message = string.Join("; ",
+                    result.Errors.Select(e => e.ErrorMessage));
+
+                throw new ValidationException(message);
+            }
         }
     }
 }

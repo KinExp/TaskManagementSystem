@@ -30,6 +30,17 @@ namespace TaskManagement.Api.Middleware
             {
                 await HandleAppException(context, ex);
             }
+            catch (FluentValidation.ValidationException ex)
+            {
+                var message = string.Join("; ",
+                    ex.Errors.Select(e => e.ErrorMessage));
+
+                await WriteRespone(
+                    context,
+                    HttpStatusCode.BadRequest,
+                    "validation_error",
+                    message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception");

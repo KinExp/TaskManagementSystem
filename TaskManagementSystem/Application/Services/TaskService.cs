@@ -18,9 +18,6 @@ namespace TaskManagement.Application.Services
 
         public async Task<TaskDto> CreateAsync(Guid userId, CreateTaskDto dto)
         {
-            if (dto.Deadline.HasValue && dto.Deadline.Value < DateTime.UtcNow)
-                throw new ValidationException("Deadline cannot be in the past");
-
             var task = new TaskItem(
                 title: dto.Title,
                 userId: userId,
@@ -66,9 +63,6 @@ namespace TaskManagement.Application.Services
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null) 
                 throw new NotFoundException("Task not found");
-
-            if (deadline.HasValue && deadline.Value < DateTime.UtcNow)
-                throw new ValidationException("Deadline cannot be in the past");
 
             if (!string.IsNullOrWhiteSpace(title))
                 task.UpdateTitle(title);

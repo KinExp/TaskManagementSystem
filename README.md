@@ -18,8 +18,12 @@ The solution is structured into independent layers:
 - All task operations are scoped to the authenticated user
 - Users can only access and modify their own tasks
 
-## Error Handling
-The API uses centralized exception handling middleware to convert application and domain exceptions into consistent HTTP error responses.
+## Error Handling & Validation
+- The API uses centralized exception handling via custom middleware
+- All errors are returned in a unified JSON format
+- Input validation is implemented with FluentValidation
+- Business errors are represented as application exceptions
+- MVC automatic validation responses are disabled
 
 ## Status
 The project is under active development.

@@ -1,15 +1,19 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TaskManagement.Api.Middleware;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Interfaces.Repositories;
+using TaskManagement.Application.Interfaces.Services;
 using TaskManagement.Application.Services;
+using TaskManagement.Application.Validators;
+using TaskManagement.Infrastructure.Auth;
 using TaskManagement.Infrastructure.Data;
 using TaskManagement.Infrastructure.Repositories;
-using TaskManagement.Application.Interfaces.Services;
-using TaskManagement.Infrastructure.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace TaskManagement.Api;
 
@@ -21,6 +25,9 @@ public class Program
 
         // Controllers
         builder.Services.AddControllers();
+
+        // Fluent Validation
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskDtoValidator>();
 
         // Swagger
         builder.Services.AddEndpointsApiExplorer();
