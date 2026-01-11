@@ -17,6 +17,21 @@ namespace TaskManagement.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+
+                entity.Property(u => u.Email)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(u => u.PasswordHash)
+                    .IsRequired();
+
+                entity.Property(u => u.Role)
+                    .IsRequired();
+            });
+
             modelBuilder.Entity<TaskItem>(entity =>
             {
                 entity.HasKey(t => t.Id);
@@ -27,6 +42,11 @@ namespace TaskManagement.Infrastructure.Data
 
                 entity.Property(t => t.Description)
                     .HasMaxLength(1000);
+
+                entity.HasOne(t => t.User)
+                    .WithMany()
+                    .HasForeignKey(t => t.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

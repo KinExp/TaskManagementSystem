@@ -6,7 +6,7 @@ namespace TaskManagement.Application.Interfaces.Repositories
     public interface ITaskRepository
     {
         Task AddAsync(TaskItem task);
-        Task<TaskItem?> GetByIdAsync(Guid id);
+        Task<TaskItem?> GetByIdAsync(Guid taskId, Guid userId);
         Task<IReadOnlyList<TaskItem>> GetByUserAsync(Guid userId);
         Task<IReadOnlyList<TaskItem>> GetByUserAsync(
             Guid userId,

@@ -57,13 +57,14 @@ namespace TaskManagement.Application.Services
         }
 
         public async Task<bool> UpdateAsync(
+            Guid userId,
             Guid taskId,
             string? title,
             string? description,
             TaskPriority? priority,
             DateTime? deadline)
         {
-            var task = await _taskRepository.GetByIdAsync(taskId);
+            var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null) 
                 return false;
 
@@ -88,9 +89,9 @@ namespace TaskManagement.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(Guid taskId)
+        public async Task<bool> DeleteAsync(Guid userId, Guid taskId)
         {
-            var task = await _taskRepository.GetByIdAsync(taskId);
+            var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null) 
                 return false;
 
@@ -100,9 +101,9 @@ namespace TaskManagement.Application.Services
             return true;
         }
 
-        public async Task<bool> MarkInProgressAsync(Guid taskId)
+        public async Task<bool> MarkInProgressAsync(Guid userId, Guid taskId)
         {
-            var task = await _taskRepository.GetByIdAsync(taskId);
+            var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null)
                 return false;
 
@@ -112,9 +113,9 @@ namespace TaskManagement.Application.Services
             return true;
         }
 
-        public async Task<bool> CompleteAsync(Guid taskId)
+        public async Task<bool> CompleteAsync(Guid userId, Guid taskId)
         {
-            var task = await _taskRepository.GetByIdAsync(taskId);
+            var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null)
                 return false;
 

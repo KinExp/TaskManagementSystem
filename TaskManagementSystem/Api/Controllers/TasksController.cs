@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskManagement.Application.DTOs;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Domain.Enums;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace TaskManagement.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/tasks")]
     public class TasksController : ControllerBase
@@ -16,15 +21,23 @@ namespace TaskManagement.Api.Controllers
             _taskService = taskService;
         }
 
+        private Guid GetUserId()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            return Guid.Parse(userId!);
+        }
+
         /// <summary>
         /// Создать новую задачу для пользователя
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult<TaskDto>> Create(
-            [FromQuery] Guid userId,
-            [FromBody] CreateTaskDto dto)
+        public async Task<ActionResult<TaskDto>> Create([FromBody] CreateTaskDto dto)
         {
+            var userId = GetUserId();
             var task = await _taskService.CreateAsync(userId, dto);
+
             return CreatedAtAction(nameof(GetByUser), new { userId }, task);
         }
 
@@ -33,11 +46,12 @@ namespace TaskManagement.Api.Controllers
         /// </summary>
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<TaskDto>>> GetByUser(
-            [FromQuery] Guid userId,
             [FromQuery] TaskState? state = null,
             [FromQuery] TaskPriority? priority = null)
         {
+            var userId = GetUserId();
             var tasks = await _taskService.GetByUserAsync(userId, state, priority);
+
             return Ok(tasks);
         }
 
@@ -49,12 +63,16 @@ namespace TaskManagement.Api.Controllers
             Guid taskId,
             [FromBody] CreateTaskDto dto)
         {
+            var userId = GetUserId();
+
             var success = await _taskService.UpdateAsync(
+                userId,
                 taskId,
                 dto.Title,
                 dto.Description,
                 dto.Priority,
                 dto.Deadline);
+
             if (!success)
                 return NotFound();
 
@@ -64,7 +82,9 @@ namespace TaskManagement.Api.Controllers
         [HttpDelete("{taskId}")]
         public async Task<IActionResult> Delete(Guid taskId)
         {
-            var success = await _taskService.DeleteAsync(taskId);
+            var userId = GetUserId();
+
+            var success = await _taskService.DeleteAsync(userId, taskId);
             if (!success)
                 return NotFound();
 
@@ -77,7 +97,9 @@ namespace TaskManagement.Api.Controllers
         [HttpPost("{taskId}/inprogress")]
         public async Task<IActionResult> MarkInProgress(Guid taskId)
         {
-            var success = await _taskService.MarkInProgressAsync(taskId);
+            var userId = GetUserId();
+
+            var success = await _taskService.MarkInProgressAsync(userId, taskId);
             if (!success)
                 return NotFound();
             return NoContent();
@@ -89,7 +111,9 @@ namespace TaskManagement.Api.Controllers
         [HttpPost("{taskId}/complete")]
         public async Task<IActionResult> Complete(Guid taskId)
         {
-            var success = await _taskService.CompleteAsync(taskId);
+            var userId = GetUserId();
+
+            var success = await _taskService.CompleteAsync(userId, taskId);
             if (!success)
                 return NotFound();
             return NoContent();

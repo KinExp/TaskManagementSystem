@@ -15,6 +15,8 @@ The solution is structured into independent layers:
 - JWT-based authentication
 - Passwords are stored using BCrypt hashing
 - Tokens are generated via a dedicated JWT service
+- All task operations are scoped to the authenticated user
+- Users can only access and modify their own tasks
 
 ## Status
 The project is under active development.

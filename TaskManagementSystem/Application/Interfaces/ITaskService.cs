@@ -13,14 +13,15 @@ namespace TaskManagement.Application.Interfaces
             TaskPriority? priority = null);
 
         Task<bool> UpdateAsync(
+            Guid userId,
             Guid taskId,
             string? title,
             string? description,
             TaskPriority? priority,
             DateTime? deadline);
-        Task<bool> DeleteAsync(Guid taskId);
+        Task<bool> DeleteAsync(Guid userId, Guid taskId);
 
-        Task<bool> MarkInProgressAsync(Guid taskId);
-        Task<bool> CompleteAsync(Guid taskId);
+        Task<bool> MarkInProgressAsync(Guid userId, Guid taskId);
+        Task<bool> CompleteAsync(Guid userId, Guid taskId);
     }
 }

@@ -13,6 +13,7 @@ namespace TaskManagement.Domain.Entities
         public DateTime? Deadline { get; private set; }
 
         public Guid UserId { get; private set; }
+        public User User { get; private set; } = null!;
 
         protected TaskItem() { }
 
@@ -23,6 +24,9 @@ namespace TaskManagement.Domain.Entities
             TaskPriority priority = TaskPriority.Medium,
             DateTime? deadline = null)
         {
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ArgumentException("Title cannot be empty");
+
             Title = title;
             UserId = userId;
             Description = description;
