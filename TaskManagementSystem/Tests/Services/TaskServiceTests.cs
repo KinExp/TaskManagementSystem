@@ -184,6 +184,27 @@ namespace Tests.Services
         }
 
         [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenTaskNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            _repositoryMock
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), userId))
+                .ReturnsAsync((TaskItem?)null);
+
+            // Act + Assert
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                _service.UpdateAsync(
+                    userId,
+                    Guid.NewGuid(),
+                    "title",
+                    "description",
+                    TaskPriority.High,
+                    DateTime.UtcNow.AddDays(1)));
+        }
+
+        [Fact]
         public async Task DeleteAsync_ShouldRemoveTrue_WhenExists()
         {
             // Arrange
@@ -207,6 +228,21 @@ namespace Tests.Services
 
             // Assert
             _repositoryMock.Verify(r => r.RemoveAsync(task), Times.Once());
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ShouldThrow_WhenTaskNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            _repositoryMock
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), userId))
+                .ReturnsAsync((TaskItem?)null);
+
+            // Act + Assert
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                _service.DeleteAsync(userId, Guid.NewGuid()));
         }
     }
 }
