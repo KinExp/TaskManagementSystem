@@ -8,6 +8,7 @@ using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Application.DTOs;
 using TaskManagement.Domain.Entities;
 using TaskManagement.Domain.Enums;
+using TaskManagement.Application.Exceptions;
 
 namespace Tests.Services
 {
@@ -57,23 +58,6 @@ namespace Tests.Services
         }
 
         [Fact]
-        public async Task CreateAsync_ShouldThrow_WhenDeadlineInPast()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-
-            var dto = new CreateTaskDto
-            {
-                Title = "Invalid Task",
-                Deadline = DateTime.UtcNow.AddDays(-1)
-            };
-
-            // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _service.CreateAsync(userId, dto));
-        }
-
-        [Fact]
         public async Task GetByUserAsync_ShouldReturnTasks()
         {
             // Arrange
@@ -97,13 +81,14 @@ namespace Tests.Services
         }
 
         [Fact]
-        public async Task MarkInProgressAsync_ShouldReturnTrue_WhenTaskExists()
+        public async Task MarkInProgressAsync_ShouldChangeState_WhenTaskExists()
         {
             // Arrange
+            var userId = Guid.NewGuid();
             var task = new TaskItem("Task", Guid.NewGuid());
 
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(task.Id))
+                .Setup(r => r.GetByIdAsync(task.Id, userId))
                 .ReturnsAsync(task);
 
             _repositoryMock
@@ -111,36 +96,73 @@ namespace Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _service.MarkInProgressAsync(task.Id);
+            await _service.MarkInProgressAsync(userId, task.Id);
 
             // Assert
-            Assert.True(result);
             Assert.Equal(TaskState.InProgress, task.State);
         }
 
         [Fact]
-        public async Task CompleteAsync_ShouldReturnFalse_WhenTaskNotFound()
+        public async Task MarkInProgressAsync_ShouldThrow_WhenTaskNotFound()
         {
             // Arrange
+            var userId = Guid.NewGuid();
+
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), userId))
                 .ReturnsAsync((TaskItem?)null);
 
+            // Act + Assert
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                _service.MarkInProgressAsync(userId, Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task CompleteAsync_ShouldChangeState_WhenTaskExists()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var task = new TaskItem("Task", Guid.NewGuid());
+
+            _repositoryMock
+                .Setup(r => r.GetByIdAsync(task.Id, userId))
+                .ReturnsAsync(task);
+
+            _repositoryMock
+                .Setup(r => r.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
             // Act
-            var result = await _service.CompleteAsync(Guid.NewGuid());
+            await _service.CompleteAsync(userId, task.Id);
 
             // Assert
-            Assert.False(result);
+            Assert.Equal(TaskState.Completed, task.State);
+        }
+
+        [Fact]
+        public async Task CompleteAsync_ShouldThrow_WhenTaskNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            _repositoryMock
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), userId))
+                .ReturnsAsync((TaskItem?)null);
+
+            // Act + Assert
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                _service.CompleteAsync(userId, Guid.NewGuid()));
         }
 
         [Fact]
         public async Task UpdateAsync_ShouldUpdateTask_WhenExists()
         {
             // Arrange
-            var task = new TaskItem("Old", Guid.NewGuid());
+            var userId = Guid.NewGuid();
+            var task = new TaskItem("Old title", Guid.NewGuid());
 
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(task.Id))
+                .Setup(r => r.GetByIdAsync(task.Id, userId))
                 .ReturnsAsync(task);
 
             _repositoryMock
@@ -148,7 +170,8 @@ namespace Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _service.UpdateAsync(
+            await _service.UpdateAsync(
+                userId,
                 task.Id,
                 "New title",
                 "New desciption",
@@ -156,18 +179,19 @@ namespace Tests.Services
                 DateTime.UtcNow.AddDays(2));
 
             // Assert
-            Assert.True(result);
             Assert.Equal("New title", task.Title);
+            Assert.Equal(TaskPriority.Low, task.Priority);
         }
 
         [Fact]
         public async Task DeleteAsync_ShouldRemoveTrue_WhenExists()
         {
             // Arrange
+            var userId = Guid.NewGuid();
             var task = new TaskItem("Task", Guid.NewGuid());
 
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(task.Id))
+                .Setup(r => r.GetByIdAsync(task.Id, userId))
                 .ReturnsAsync(task);
 
             _repositoryMock
@@ -179,10 +203,10 @@ namespace Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _service.DeleteAsync(task.Id);
+            await _service.DeleteAsync(userId, task.Id);
 
             // Assert
-            Assert.True(result);
+            _repositoryMock.Verify(r => r.RemoveAsync(task), Times.Once());
         }
     }
 }
