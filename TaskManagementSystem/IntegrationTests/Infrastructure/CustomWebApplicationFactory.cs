@@ -11,6 +11,8 @@ namespace TaskManagement.IntegrationTests.Infrastructure
     public class CustomWebApplicationFactory
         : WebApplicationFactory<Program>
     {
+        private readonly string _databaseName = Guid.NewGuid().ToString();
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
@@ -24,7 +26,7 @@ namespace TaskManagement.IntegrationTests.Infrastructure
 
                 services.AddDbContext<AppDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("IntegrationTestsDb");
+                    options.UseInMemoryDatabase(_databaseName);
                 });
 
                 services.AddAuthentication(options =>
