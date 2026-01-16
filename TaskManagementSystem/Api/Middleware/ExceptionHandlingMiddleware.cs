@@ -62,6 +62,7 @@ namespace TaskManagement.Api.Middleware
                 NotFoundException => HttpStatusCode.NotFound,
                 ValidationException => HttpStatusCode.BadRequest,
                 ForbiddenException => HttpStatusCode.Forbidden,
+                UnauthorizedException => HttpStatusCode.Unauthorized,
                 _ => HttpStatusCode.BadRequest
             };
 
@@ -70,6 +71,7 @@ namespace TaskManagement.Api.Middleware
                 NotFoundException => "not_found",
                 ValidationException => "validation_error",
                 ForbiddenException => "forbidden",
+                UnauthorizedException => "unauthorized",
                 _ => "app_error"
             };
 

@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TaskManagement.Infrastructure.Data;
 using TaskManagement.Application.DTOs.Auth;
 using TaskManagement.Application.Interfaces.Services;
-using TaskManagement.Domain.Entities;
-using BCrypt.Net;
 
 namespace TaskManagement.Api.Controllers
 {
@@ -12,30 +8,25 @@ namespace TaskManagement.Api.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
-        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IAuthService _authService;
 
-        public AuthController(
-            AppDbContext dbContext,
-            IJwtTokenService jwtTokenService)
+        public AuthController(IAuthService authService)
         {
-            _dbContext = dbContext;
-            _jwtTokenService = jwtTokenService;
+            _authService = authService;
         }
 
+        /// <summary>
+        /// Authenticate user and return JWT access token
+        /// </summary>
+        /// <response code="200">Login successful</response>
+        /// <response code="401">Invalid credentials</response>
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        [ProducesResponseType(typeof(LoginResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LoginResultDto>> Login([FromBody] LoginDto dto)
         {
-            var user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == dto.Email);
-
-            if (user == null || string.IsNullOrEmpty(user.PasswordHash) ||
-                !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                return Unauthorized();
-
-            var token = _jwtTokenService.GenerateToken(user.Id, user.Email);
-
-            return Ok(new { accessToken = token });
+            var result = await _authService.LoginAsync(dto.Email, dto.Password);
+            return Ok(result);
         }
     }
 }
