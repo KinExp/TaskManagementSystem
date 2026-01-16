@@ -11,7 +11,11 @@ namespace TaskManagement.Application.Interfaces.Repositories
         Task<IReadOnlyList<TaskItem>> GetByUserAsync(
             Guid userId,
             TaskState? state,
-            TaskPriority? priority);
+            TaskPriority? priority,
+            string? search,
+            TaskSortOption sort,
+            int skip,
+            int take);
 
         Task UpdateAsync(TaskItem task);
         Task RemoveAsync(TaskItem task);

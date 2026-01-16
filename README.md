@@ -25,5 +25,10 @@ The solution is structured into independent layers:
 - Business errors are represented as application exceptions
 - MVC automatic validation responses are disabled
 
+## API Documentation
+The API is fully documented using Swagger (OpenAPI).
+All query parameters, filters, sorting options, and response codes
+are described and available via the Swagger UI.
+
 ## Status
 The project is under active development.

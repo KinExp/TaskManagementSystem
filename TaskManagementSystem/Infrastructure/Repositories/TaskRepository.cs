@@ -36,7 +36,11 @@ namespace TaskManagement.Infrastructure.Repositories
         public async Task<IReadOnlyList<TaskItem>> GetByUserAsync(
             Guid userId,
             TaskState? state,
-            TaskPriority? priority)
+            TaskPriority? priority,
+            string? search,
+            TaskSortOption sort,
+            int skip,
+            int take)
         {
             var query = _context.Tasks.Where(t => t.UserId == userId);
 
@@ -46,7 +50,26 @@ namespace TaskManagement.Infrastructure.Repositories
             if (priority.HasValue)
                 query = query.Where(t => t.Priority == priority.Value);
 
-            return await query.ToListAsync();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalized = search.Trim().ToLower();
+
+                query = query.Where(t =>
+                    t.Title.ToLower().Contains(normalized));
+            }
+
+            query = sort switch
+            {
+                TaskSortOption.CreatedAtAsc => query.OrderBy(t => t.CreatedAt),
+                TaskSortOption.PriorityAsc => query.OrderBy(t => t.Priority),
+                TaskSortOption.PriorityDesc => query.OrderBy(t => t.Priority),
+                _ => query.OrderByDescending(t => t.CreatedAt)
+            };
+
+            return await query
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
         }
 
         public async Task UpdateAsync(TaskItem task)

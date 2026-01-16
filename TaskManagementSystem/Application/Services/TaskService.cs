@@ -43,9 +43,20 @@ namespace TaskManagement.Application.Services
         public async Task<IReadOnlyList<TaskDto>> GetByUserAsync(
             Guid userId,
             TaskState? state = null,
-            TaskPriority? priority = null)
+            TaskPriority? priority = null,
+            string? search = null,
+            TaskSortOption sort = TaskSortOption.CreatedAtDesc,
+            int skip = 0,
+            int take = 20)
         {
-            var tasks = await _taskRepository.GetByUserAsync(userId, state, priority);
+            var tasks = await _taskRepository.GetByUserAsync(
+                userId,
+                state,
+                priority,
+                search,
+                sort,
+                skip,
+                take);
 
             return tasks
                 .Select(MapToDto)
