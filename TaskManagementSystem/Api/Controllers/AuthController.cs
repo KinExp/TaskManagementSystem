@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TaskManagement.Application.DTOs.Auth;
 using TaskManagement.Application.Interfaces.Services;
 
@@ -54,6 +56,24 @@ namespace TaskManagement.Api.Controllers
         public async Task<IActionResult> Logout([FromBody] LogoutRequestDto dto)
         {
             await _authService.LogoutAsync(dto.RefreshToken);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Logout user from all devices
+        /// </summary>
+        /// <response code="204">Logout successful</response>
+        [Authorize]
+        [HttpPost("logout-all")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> LogoutAll()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+                return Unauthorized();
+
+            await _authService.LogoutAllAsync(Guid.Parse(userId));
             return NoContent();
         }
     }

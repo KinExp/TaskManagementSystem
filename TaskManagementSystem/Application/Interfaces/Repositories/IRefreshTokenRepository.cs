@@ -7,5 +7,6 @@ namespace TaskManagement.Application.Interfaces.Repositories
         Task<RefreshToken?> GetByTokenAsync(string token);
         Task AddAsync (RefreshToken token);
         Task UpdateAsync (RefreshToken token);
+        Task RevokeAllAsync(Guid userId);
     }
 }

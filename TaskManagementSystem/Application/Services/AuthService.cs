@@ -82,5 +82,10 @@ namespace TaskManagement.Application.Services
             token.Revoke();
             await _refreshTokenRepository.UpdateAsync(token);
         }
+
+        public async Task LogoutAllAsync(Guid userId)
+        {
+            await _refreshTokenRepository.RevokeAllAsync(userId);
+        }
     }
 }

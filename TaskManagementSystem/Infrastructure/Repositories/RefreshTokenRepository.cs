@@ -32,5 +32,19 @@ namespace Infrastructure.Repositories
             _dbContext.RefreshTokens.Update(token);
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task RevokeAllAsync(Guid userId)
+        {
+            var tokens = await _dbContext.RefreshTokens
+                .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                .ToListAsync();
+
+            foreach (var token in tokens)
+            {
+                token.Revoke();
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }
