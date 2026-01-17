@@ -6,5 +6,6 @@ namespace TaskManagement.Application.Interfaces.Services
     {
         Task<LoginResultDto> LoginAsync(string email, string password);
         Task<LoginResultDto> RefreshAsync(string refreshToken);
+        Task LogoutAsync(string refreshToken);
     }
 }

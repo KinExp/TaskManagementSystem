@@ -44,5 +44,17 @@ namespace TaskManagement.Api.Controllers
             var result = await _authService.RefreshAsync(dto.RefreshToken);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Logout user by revoking refresh token
+        /// </summary>
+        /// <response code="204">Logout successful</response>
+        [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto dto)
+        {
+            await _authService.LogoutAsync(dto.RefreshToken);
+            return NoContent();
+        }
     }
 }

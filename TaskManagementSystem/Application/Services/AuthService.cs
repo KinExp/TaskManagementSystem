@@ -70,5 +70,17 @@ namespace TaskManagement.Application.Services
                 RefreshToken = newRefreshToken.Token
             };
         }
+
+        public async Task LogoutAsync(string refreshToken)
+        {
+            var token = await _refreshTokenRepository
+                .GetByTokenAsync(refreshToken);
+
+            if (token == null || token.IsRevoked || token.IsExpired)
+                return;
+
+            token.Revoke();
+            await _refreshTokenRepository.UpdateAsync(token);
+        }
     }
 }
