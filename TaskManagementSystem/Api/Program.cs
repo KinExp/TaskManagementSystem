@@ -4,6 +4,7 @@ using Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
@@ -71,10 +72,19 @@ public class Program
             options.IncludeXmlComments(xmlPath);
         });
 
+        // JWT Options
+        builder.Services.Configure<JwtOptions>(
+            builder.Configuration.GetSection("Jwt"));
+
         // Authentication
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                var jwtOptions = builder.Configuration
+                    .GetSection("Jwt")
+                    .Get<JwtOptions>()
+                    ?? throw new InvalidOperationException("Jwt options are not configured");
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -82,10 +92,10 @@ public class Program
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                        Encoding.UTF8.GetBytes(jwtOptions.Key))
                 };
             });
 
