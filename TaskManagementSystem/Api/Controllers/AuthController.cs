@@ -19,9 +19,11 @@ namespace TaskManagement.Api.Controllers
         /// Authenticate user and return JWT access token
         /// </summary>
         /// <response code="200">Login successful</response>
-        /// <response code="401">Invalid credentials</response>
+        /// <response code="400">Invalid request data</response>
+        /// <response code="401">Invalid email or password</response>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LoginResultDto>> Login([FromBody] LoginDto dto)
         {
