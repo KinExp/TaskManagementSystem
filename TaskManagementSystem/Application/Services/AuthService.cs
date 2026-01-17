@@ -50,8 +50,17 @@ namespace TaskManagement.Application.Services
             var token = await _refreshTokenRepository
                 .GetByTokenAsync(refreshToken);
 
-            if (token == null || !token.IsActive)
+            if (token == null)
                 throw new UnauthorizedException("Invalid refresh token");
+
+            if (token.IsExpired)
+                throw new UnauthorizedException("Refresh token expired");
+
+            if (token.IsRevoked)
+            {
+                await _refreshTokenRepository.RevokeAllAsync(token.UserId);
+                throw new UnauthorizedException("Refresh token reuse detected");
+            }
 
             token.Revoke();
             await _refreshTokenRepository.UpdateAsync(token);
