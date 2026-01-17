@@ -19,11 +19,21 @@
             IsRevoked = false;
         }
 
+        public bool IsActive => !IsRevoked && !IsExpired;
+
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
 
         public void Revoke()
         {
             IsRevoked = true;
+        }
+
+        public static RefreshToken Create(Guid userId)
+        {
+            return new RefreshToken(
+                userId,
+                Guid.NewGuid().ToString("N"),
+                DateTime.UtcNow.AddDays(7));
         }
     }
 }

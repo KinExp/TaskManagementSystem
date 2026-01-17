@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure.Auth;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +107,7 @@ public class Program
         // Repositories
         builder.Services.AddScoped<ITaskRepository, TaskRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         // Services
         builder.Services.AddScoped<ITaskService, TaskService>();

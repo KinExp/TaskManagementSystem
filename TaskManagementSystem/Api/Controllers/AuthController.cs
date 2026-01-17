@@ -30,5 +30,19 @@ namespace TaskManagement.Api.Controllers
             var result = await _authService.LoginAsync(dto.Email, dto.Password);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Refresh access token using refresh token
+        /// </summary>
+        /// <response code="200">Token refreshed</response>
+        /// <response code="401">Invalid refresh token</response>
+        [HttpPost("refresh")]
+        [ProducesResponseType(typeof(LoginResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LoginResultDto>> Refresh([FromBody] RefreshTokenRequestDto dto)
+        {
+            var result = await _authService.RefreshAsync(dto.RefreshToken);
+            return Ok(result);
+        }
     }
 }
