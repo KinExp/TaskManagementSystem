@@ -29,7 +29,10 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LoginResultDto>> Login([FromBody] LoginDto dto)
         {
-            var result = await _authService.LoginAsync(dto.Email, dto.Password);
+            var result = await _authService.LoginAsync(
+                dto.Email,
+                dto.Password,
+                dto.DeviceId);
             return Ok(result);
         }
 
@@ -43,7 +46,9 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LoginResultDto>> Refresh([FromBody] RefreshTokenRequestDto dto)
         {
-            var result = await _authService.RefreshAsync(dto.RefreshToken);
+            var result = await _authService.RefreshAsync(
+                dto.RefreshToken,
+                dto.DeviceId);
             return Ok(result);
         }
 

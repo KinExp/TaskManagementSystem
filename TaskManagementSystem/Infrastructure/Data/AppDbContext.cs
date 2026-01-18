@@ -51,11 +51,27 @@ namespace TaskManagement.Infrastructure.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<RefreshToken>()
-                .HasOne(rt => rt.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(t => t.Id);
+
+                entity.Property(rt => rt.Token)
+                    .IsRequired();
+
+                entity.Property(rt => rt.DeviceId)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(rt => rt.ExpiresAt)
+                    .IsRequired();
+
+                entity.HasIndex(rt => new { rt.UserId, rt.DeviceId });
+
+                entity.HasOne(rt => rt.User)
+                    .WithMany(u => u.RefreshTokens)
+                    .HasForeignKey(rt => rt.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

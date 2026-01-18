@@ -8,5 +8,6 @@ namespace TaskManagement.Application.Interfaces.Repositories
         Task AddAsync (RefreshToken token);
         Task UpdateAsync (RefreshToken token);
         Task RevokeAllAsync(Guid userId);
+        Task RevokeByUserAndDeviceAsync(Guid userId, string deviceId);
     }
 }

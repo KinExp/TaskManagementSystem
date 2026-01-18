@@ -46,5 +46,22 @@ namespace Infrastructure.Repositories
 
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task RevokeByUserAndDeviceAsync(Guid userId, string deviceId)
+        {
+            var tokens = await _dbContext.RefreshTokens
+                .Where(rt =>
+                    rt.UserId == userId &&
+                    rt.DeviceId == deviceId &&
+                    !rt.IsRevoked)
+                .ToListAsync();
+
+            foreach (var token in tokens)
+            {
+                token.Revoke();
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

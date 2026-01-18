@@ -25,17 +25,23 @@ namespace TaskManagement.Application.Services
             _refreshTokenRepository = refreshTokenRepository;
         }
 
-        public async Task<LoginResultDto> LoginAsync(string email, string password)
+        public async Task<LoginResultDto> LoginAsync(
+            string email,
+            string password,
+            string deviceId)
         {
             var user = await _userRepository.GetByEmailAsync(email);
 
             if (user == null || !_passwordHasher.Verify(password, user.PasswordHash))
                 throw new UnauthorizedException("Invalid email or password");
 
+            await _refreshTokenRepository
+                .RevokeByUserAndDeviceAsync(user.Id, deviceId);
+
             var accessToken = _jwtTokenService
                 .GenerateToken(user.Id, user.Email);
 
-            var refreshToken = RefreshToken.Create(user.Id);
+            var refreshToken = RefreshToken.Create(user.Id, deviceId);
             await _refreshTokenRepository.AddAsync(refreshToken);
 
             return new LoginResultDto
@@ -45,7 +51,9 @@ namespace TaskManagement.Application.Services
             };
         }
 
-        public async Task<LoginResultDto> RefreshAsync(string refreshToken)
+        public async Task<LoginResultDto> RefreshAsync(
+            string refreshToken,
+            string deviceId)
         {
             var token = await _refreshTokenRepository
                 .GetByTokenAsync(refreshToken);
@@ -62,6 +70,12 @@ namespace TaskManagement.Application.Services
                 throw new UnauthorizedException("Refresh token reuse detected");
             }
 
+            if (token.DeviceId != deviceId)
+            {
+                await _refreshTokenRepository.RevokeAllAsync(token.UserId);
+                throw new UnauthorizedException("Refresh token device mismatch");
+            }
+
             token.Revoke();
             await _refreshTokenRepository.UpdateAsync(token);
 
@@ -70,7 +84,7 @@ namespace TaskManagement.Application.Services
             var accessToken = _jwtTokenService
                 .GenerateToken(user.Id, user.Email);
 
-            var newRefreshToken = RefreshToken.Create(user.Id);
+            var newRefreshToken = RefreshToken.Create(user.Id, deviceId);
             await _refreshTokenRepository.AddAsync(newRefreshToken);
 
             return new LoginResultDto
