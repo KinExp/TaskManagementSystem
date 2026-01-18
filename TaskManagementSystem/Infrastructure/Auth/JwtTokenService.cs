@@ -17,7 +17,7 @@ namespace TaskManagement.Infrastructure.Auth
             _options = options.Value;
         }
 
-        public string GenerateToken(Guid userId, string email)
+        public string GenerateToken(Guid userId, string email, string role)
         {
             var now = DateTime.UtcNow;
 
@@ -25,6 +25,7 @@ namespace TaskManagement.Infrastructure.Auth
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(ClaimTypes.Role, role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, 
                     new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
@@ -34,8 +35,8 @@ namespace TaskManagement.Infrastructure.Auth
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_options.Key));
 
-            var credentials = new SigningCredentials
-                (key,
+            var credentials = new SigningCredentials(
+                key,
                 SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

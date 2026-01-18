@@ -39,7 +39,7 @@ namespace TaskManagement.Application.Services
                 .RevokeByUserAndDeviceAsync(user.Id, deviceId);
 
             var accessToken = _jwtTokenService
-                .GenerateToken(user.Id, user.Email);
+                .GenerateToken(user.Id, user.Email, user.Role);
 
             var refreshToken = RefreshToken.Create(user.Id, deviceId);
             await _refreshTokenRepository.AddAsync(refreshToken);
@@ -82,7 +82,7 @@ namespace TaskManagement.Application.Services
             var user = token.User;
 
             var accessToken = _jwtTokenService
-                .GenerateToken(user.Id, user.Email);
+                .GenerateToken(user.Id, user.Email, user.Role);
 
             var newRefreshToken = RefreshToken.Create(user.Id, deviceId);
             await _refreshTokenRepository.AddAsync(newRefreshToken);

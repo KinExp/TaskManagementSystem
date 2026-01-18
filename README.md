@@ -18,6 +18,13 @@ The solution is structured into independent layers:
 - All task operations are scoped to the authenticated user
 - Users can only access and modify their own tasks
 
+## Authorization & Roles
+- Role-based authorization is implemented using JWT claims
+- User role is included in the access token
+- ASP.NET Core `[Authorize(Roles = "...")]` is used to protect endpoints
+- Example: admin-only endpoints for user management
+- Supported roles: User, Admin
+
 ## Error Handling & Validation
 - The API uses centralized exception handling via custom middleware
 - All errors are returned in a unified JSON format

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using TaskManagement.Api.Middleware;
 using TaskManagement.Application.Interfaces;
@@ -90,6 +91,7 @@ public class Program
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = JwtRegisteredClaimNames.Sub,
+                    RoleClaimType = ClaimTypes.Role,
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
