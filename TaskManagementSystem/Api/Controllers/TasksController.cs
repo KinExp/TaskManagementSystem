@@ -5,7 +5,6 @@ using TaskManagement.Application.Interfaces;
 using TaskManagement.Domain.Enums;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FluentValidation;
 
 namespace TaskManagement.Api.Controllers
@@ -17,13 +16,16 @@ namespace TaskManagement.Api.Controllers
     {
         private readonly ITaskService _taskService;
         private readonly IValidator<CreateTaskDto> _createValidator;
+        private readonly IAuthorizationService _authorizationService;
 
         public TasksController(
             ITaskService taskService,
-            IValidator<CreateTaskDto> createValidator)
+            IValidator<CreateTaskDto> createValidator,
+            IAuthorizationService authorizationService)
         {
             _taskService = taskService;
             _createValidator = createValidator;
+            _authorizationService = authorizationService;
         }
 
         private Guid GetUserId()
@@ -107,10 +109,18 @@ namespace TaskManagement.Api.Controllers
         {
             await ValidateAsync(dto);
 
-            var userId = GetUserId();
+            var task = await _taskService.GetEntityByIdAsync(taskId);
+
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User,
+                task,
+                "TaskAccessPolicy");
+
+            if (!authResult.Succeeded)
+                return Forbid();
 
             await _taskService.UpdateAsync(
-                userId,
+                task.UserId,
                 taskId,
                 dto.Title,
                 dto.Description,
@@ -131,9 +141,17 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid taskId)
         {
-            var userId = GetUserId();
+            var task = await _taskService.GetEntityByIdAsync(taskId);
 
-            await _taskService.DeleteAsync(userId, taskId);
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User,
+                task,
+                "TaskAccessPolicy");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
+            await _taskService.DeleteAsync(task.UserId, taskId);
 
             return NoContent();
         }
@@ -151,9 +169,17 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkInProgress(Guid taskId)
         {
-            var userId = GetUserId();
+            var task = await _taskService.GetEntityByIdAsync(taskId);
 
-            await _taskService.MarkInProgressAsync(userId, taskId);
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User,
+                task,
+                "TaskAccessPolicy");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
+            await _taskService.MarkInProgressAsync(task.UserId, taskId);
             
             return NoContent();
         }
@@ -171,9 +197,17 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Complete(Guid taskId)
         {
-            var userId = GetUserId();
+            var task = await _taskService.GetEntityByIdAsync(taskId);
 
-            await _taskService.CompleteAsync(userId, taskId);
+            var authResult = await _authorizationService.AuthorizeAsync(
+                User,
+                task,
+                "TaskAccessPolicy");
+
+            if (!authResult.Succeeded)
+                return Forbid();
+
+            await _taskService.CompleteAsync(task.UserId, taskId);
             
             return NoContent();
         }

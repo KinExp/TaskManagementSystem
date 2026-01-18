@@ -1,4 +1,5 @@
 ﻿using TaskManagement.Application.DTOs;
+using TaskManagement.Domain.Entities;
 using TaskManagement.Domain.Enums;
 
 namespace TaskManagement.Application.Interfaces
@@ -27,5 +28,6 @@ namespace TaskManagement.Application.Interfaces
 
         Task MarkInProgressAsync(Guid userId, Guid taskId);
         Task CompleteAsync(Guid userId, Guid taskId);
+        Task<TaskItem> GetEntityByIdAsync(Guid taskId);
     }
 }

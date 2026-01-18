@@ -72,13 +72,13 @@ namespace TaskManagement.Application.Services
             DateTime? deadline)
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
-            if (task == null) 
+            if (task == null)
                 throw new NotFoundException("Task not found");
 
             if (!string.IsNullOrWhiteSpace(title))
                 task.UpdateTitle(title);
 
-            if (description != null) 
+            if (description != null)
                 task.UpdateDescription(description);
 
             if (priority.HasValue)
@@ -94,7 +94,7 @@ namespace TaskManagement.Application.Services
         public async Task DeleteAsync(Guid userId, Guid taskId)
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
-            if (task == null) 
+            if (task == null)
                 throw new NotFoundException("Task not found");
 
             await _taskRepository.RemoveAsync(task);
@@ -119,6 +119,16 @@ namespace TaskManagement.Application.Services
 
             task.MarkCompleted();
             await _taskRepository.SaveChangesAsync();
+        }
+
+        public async Task<TaskItem> GetEntityByIdAsync(Guid taskId)
+        {
+            var task = await _taskRepository.GetByIdAsync(taskId);
+
+            if (task == null)
+                throw new NotFoundException("Task not found");
+
+            return task;
         }
 
         private static TaskDto MapToDto(TaskItem task)

@@ -20,6 +20,12 @@ namespace TaskManagement.Infrastructure.Repositories
             await _context.Tasks.AddAsync(task);
         }
 
+        public async Task<TaskItem?> GetByIdAsync(Guid taskId)
+        {
+            return await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+        }
+
         public async Task<TaskItem?> GetByIdAsync(Guid taskId, Guid userId)
         {
             return await _context.Tasks

@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Infrastructure.Auth;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using TaskManagement.Api.Authorization;
 using TaskManagement.Api.Middleware;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Interfaces.Repositories;
@@ -103,6 +105,15 @@ public class Program
                         Encoding.UTF8.GetBytes(jwtOptions.Key))
                 };
             });
+
+        // Authorization
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("TaskAccessPolicy", policy =>
+                policy.Requirements.Add(new TaskAccessRequirement()));
+        });
+
+        builder.Services.AddScoped<IAuthorizationHandler, TaskAccessHandler>();
 
         // DbContext
         builder.Services.AddDbContext<AppDbContext>(options =>
