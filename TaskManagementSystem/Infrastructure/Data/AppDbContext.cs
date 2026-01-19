@@ -45,6 +45,11 @@ namespace TaskManagement.Infrastructure.Data
                 entity.Property(t => t.Description)
                     .HasMaxLength(1000);
 
+                entity.Property(t => t.IsDeleted)
+                    .IsRequired();
+
+                entity.HasQueryFilter(t => !t.IsDeleted);
+
                 entity.HasOne(t => t.User)
                     .WithMany()
                     .HasForeignKey(t => t.UserId)

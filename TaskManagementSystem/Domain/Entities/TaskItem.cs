@@ -15,6 +15,8 @@ namespace TaskManagement.Domain.Entities
         public Guid UserId { get; private set; }
         public User User { get; private set; } = null!;
 
+        public bool IsDeleted { get; private set; }
+
         protected TaskItem() { }
 
         public TaskItem(
@@ -32,6 +34,15 @@ namespace TaskManagement.Domain.Entities
             Description = description;
             Priority = priority;
             Deadline = deadline;
+            IsDeleted = false;
+        }
+
+        public void SoftDelete()
+        {
+            if (IsDeleted) 
+                return;
+
+            IsDeleted = true;
         }
 
         public void UpdateTitle(string title) => Title = title;

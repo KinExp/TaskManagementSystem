@@ -97,7 +97,8 @@ namespace TaskManagement.Application.Services
             if (task == null)
                 throw new NotFoundException("Task not found");
 
-            await _taskRepository.RemoveAsync(task);
+            task.SoftDelete();
+
             await _taskRepository.SaveChangesAsync();
         }
 
