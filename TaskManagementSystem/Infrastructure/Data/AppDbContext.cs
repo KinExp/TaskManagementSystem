@@ -48,6 +48,13 @@ namespace TaskManagement.Infrastructure.Data
                 entity.Property(t => t.IsDeleted)
                     .IsRequired();
 
+                entity.Property(t => t.CreatedAt)
+                    .IsRequired();
+
+                entity.Property(t => t.UpdatedAt);
+
+                entity.Property(t => t.DeletedAt);
+
                 entity.HasQueryFilter(t => !t.IsDeleted);
 
                 entity.HasOne(t => t.User)
@@ -77,6 +84,23 @@ namespace TaskManagement.Infrastructure.Data
                     .HasForeignKey(rt => rt.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+        }
+
+        public override async Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var utcNow = DateTime.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                    entry.Entity.CreatedAt = utcNow;
+
+                if (entry.State == EntityState.Modified)
+                    entry.Entity.UpdatedAt = utcNow;
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

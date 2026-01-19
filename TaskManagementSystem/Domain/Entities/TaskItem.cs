@@ -16,6 +16,7 @@ namespace TaskManagement.Domain.Entities
         public User User { get; private set; } = null!;
 
         public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
 
         protected TaskItem() { }
 
@@ -43,6 +44,7 @@ namespace TaskManagement.Domain.Entities
                 return;
 
             IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
         }
 
         public void UpdateTitle(string title) => Title = title;
