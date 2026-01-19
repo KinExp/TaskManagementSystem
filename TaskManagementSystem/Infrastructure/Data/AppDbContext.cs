@@ -1,16 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskManagement.Application.Interfaces.Services;
 using TaskManagement.Domain.Entities;
 
 namespace TaskManagement.Infrastructure.Data
 {
     public class AppDbContext : DbContext
     {
+        private readonly ICurrentUserService _currentUserService;
+
         public DbSet<TaskItem> Tasks => Set<TaskItem>();
         public DbSet<User> Users => Set<User>();
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public AppDbContext(
+            DbContextOptions<AppDbContext> options,
+            ICurrentUserService currentUserService)
             : base(options)
         {
+            _currentUserService = currentUserService;
         }
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -90,14 +96,20 @@ namespace TaskManagement.Infrastructure.Data
             CancellationToken cancellationToken = default)
         {
             var utcNow = DateTime.UtcNow;
+            var currentUserId = _currentUserService.UserId;
 
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
             {
                 if (entry.State == EntityState.Added)
+                {
                     entry.Entity.CreatedAt = utcNow;
-
-                if (entry.State == EntityState.Modified)
+                    entry.Entity.CreatedBy = currentUserId;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
                     entry.Entity.UpdatedAt = utcNow;
+                    entry.Entity.UpdatedBy = currentUserId;
+                }
             }
 
             return await base.SaveChangesAsync(cancellationToken);

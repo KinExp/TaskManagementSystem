@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using TaskManagement.Api.Authorization;
 using TaskManagement.Api.Middleware;
+using TaskManagement.Api.Services;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Interfaces.Repositories;
 using TaskManagement.Application.Interfaces.Services;
@@ -129,6 +130,9 @@ public class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
         builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         var app = builder.Build();
 
