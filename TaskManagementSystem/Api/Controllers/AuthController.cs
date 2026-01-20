@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 using TaskManagement.Application.DTOs.Auth;
 using TaskManagement.Application.Interfaces.Services;
@@ -24,6 +25,7 @@ namespace TaskManagement.Api.Controllers
         /// <response code="400">Invalid request data</response>
         /// <response code="401">Invalid email or password</response>
         [HttpPost("login")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(typeof(LoginResultDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -42,6 +44,7 @@ namespace TaskManagement.Api.Controllers
         /// <response code="200">Token refreshed</response>
         /// <response code="401">Invalid refresh token</response>
         [HttpPost("refresh")]
+        [EnableRateLimiting("AuthPolicy")]
         [ProducesResponseType(typeof(LoginResultDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LoginResultDto>> Refresh([FromBody] RefreshTokenRequestDto dto)

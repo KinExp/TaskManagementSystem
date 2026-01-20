@@ -12,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 using TaskManagement.Api.Authorization;
 using TaskManagement.Api.Middleware;
 using TaskManagement.Api.Services;
@@ -34,6 +35,27 @@ public class Program
 
         // Controllers
         builder.Services.AddControllers();
+
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.AddPolicy("AuthPolicy", context =>
+            {
+                var ip = context.Connection.RemoteIpAddress?.ToString()
+                    ?? "unknown";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: ip,
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    });
+            });
+        });
 
         // Fluent Validation
         builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskDtoValidator>();
@@ -152,6 +174,7 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseRateLimiter();
         app.MapControllers();
 
         app.Run();
