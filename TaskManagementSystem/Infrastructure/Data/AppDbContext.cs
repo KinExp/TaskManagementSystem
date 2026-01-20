@@ -110,6 +110,15 @@ namespace TaskManagement.Infrastructure.Data
                     entry.Entity.UpdatedAt = utcNow;
                     entry.Entity.UpdatedBy = currentUserId;
                 }
+
+                if (entry.Entity is TaskItem task)
+                {
+                    if (task.IsDeleted && task.DeletedAt == null)
+                    {
+                        task.DeletedAt = utcNow;
+                        task.DeletedBy = currentUserId;
+                    }
+                }
             }
 
             return await base.SaveChangesAsync(cancellationToken);

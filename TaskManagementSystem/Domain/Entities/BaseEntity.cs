@@ -6,8 +6,10 @@
 
         public DateTime CreatedAt { get; internal set; }
         public DateTime? UpdatedAt { get; internal set; }
+        public DateTime? DeletedAt { get; internal set; }
 
         public Guid? CreatedBy { get; internal set; }
         public Guid? UpdatedBy { get; internal set; }
+        public Guid? DeletedBy { get; internal set; }
     }
 }

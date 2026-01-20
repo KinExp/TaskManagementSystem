@@ -16,7 +16,6 @@ namespace TaskManagement.Domain.Entities
         public User User { get; private set; } = null!;
 
         public bool IsDeleted { get; private set; }
-        public DateTime? DeletedAt { get; private set; }
 
         protected TaskItem() { }
 
@@ -41,10 +40,9 @@ namespace TaskManagement.Domain.Entities
         public void SoftDelete()
         {
             if (IsDeleted) 
-                return;
+                throw new InvalidOperationException("Task is already deleted");
 
             IsDeleted = true;
-            DeletedAt = DateTime.UtcNow;
         }
 
         public void UpdateTitle(string title) => Title = title;
