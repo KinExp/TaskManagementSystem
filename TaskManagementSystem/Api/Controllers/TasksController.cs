@@ -7,6 +7,8 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using FluentValidation;
 using FluentValidation.Results;
+using TaskManagement.Domain.Entities;
+using TaskManagement.Application.Exceptions;
 
 namespace TaskManagement.Api.Controllers
 {
@@ -113,15 +115,7 @@ namespace TaskManagement.Api.Controllers
         {
             await ValidateAsync(dto);
 
-            var task = await _taskService.GetEntityByIdAsync(taskId);
-
-            var authResult = await _authorizationService.AuthorizeAsync(
-                User,
-                task,
-                "TaskAccessPolicy");
-
-            if (!authResult.Succeeded)
-                return Forbid();
+            var task = await GetAuthorizedTaskAsync(taskId);
 
             await _taskService.UpdateAsync(task.UserId, taskId, dto);
 
@@ -139,15 +133,7 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid taskId)
         {
-            var task = await _taskService.GetEntityByIdAsync(taskId);
-
-            var authResult = await _authorizationService.AuthorizeAsync(
-                User,
-                task,
-                "TaskAccessPolicy");
-
-            if (!authResult.Succeeded)
-                return Forbid();
+            var task = await GetAuthorizedTaskAsync(taskId);
 
             await _taskService.DeleteAsync(task.UserId, taskId);
 
@@ -167,15 +153,7 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkInProgress(Guid taskId)
         {
-            var task = await _taskService.GetEntityByIdAsync(taskId);
-
-            var authResult = await _authorizationService.AuthorizeAsync(
-                User,
-                task,
-                "TaskAccessPolicy");
-
-            if (!authResult.Succeeded)
-                return Forbid();
+            var task = await GetAuthorizedTaskAsync(taskId);
 
             await _taskService.MarkInProgressAsync(task.UserId, taskId);
             
@@ -195,6 +173,15 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Complete(Guid taskId)
         {
+            var task = await GetAuthorizedTaskAsync(taskId);
+
+            await _taskService.CompleteAsync(task.UserId, taskId);
+            
+            return NoContent();
+        }
+
+        private async Task<TaskItem> GetAuthorizedTaskAsync(Guid taskId)
+        {
             var task = await _taskService.GetEntityByIdAsync(taskId);
 
             var authResult = await _authorizationService.AuthorizeAsync(
@@ -203,11 +190,9 @@ namespace TaskManagement.Api.Controllers
                 "TaskAccessPolicy");
 
             if (!authResult.Succeeded)
-                return Forbid();
+                throw new ForbiddenException("You do not have access to this task");
 
-            await _taskService.CompleteAsync(task.UserId, taskId);
-            
-            return NoContent();
+            return task;
         }
 
         private async Task ValidateAsync(CreateTaskDto dto)
@@ -229,7 +214,7 @@ namespace TaskManagement.Api.Controllers
                 var message = string.Join("; ",
                     result.Errors.Select(e => e.ErrorMessage));
 
-                throw new ValidationException(message);
+                throw new Application.Exceptions.ValidationException(message);
             }
         }
     }

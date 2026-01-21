@@ -20,7 +20,8 @@ namespace TaskManagement.Api.Authorization
 
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId != null && resource.UserId.ToString() == userId)
+            if (Guid.TryParse(userId, out var parsetUserId)
+                && resource.UserId == parsetUserId)
             {
                 context.Succeed(requirement);
             }
