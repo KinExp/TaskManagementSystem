@@ -45,13 +45,23 @@ namespace TaskManagement.Domain.Entities
             IsDeleted = true;
         }
 
-        public void UpdateTitle(string title) => Title = title;
+        public void UpdateTitle(string title) 
+        {
+            EnsureNotDeleted();
+
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ArgumentException("Title cannot be empty");
+
+            Title = title;
+        }
         public void UpdateDescription(string? description) => Description = description;
         public void UpdatePriority(TaskPriority priority) => Priority = priority;
         public void UpdateDeadline(DateTime? deadline) => Deadline = deadline;
 
         public void MarkInProgress()
         {
+            EnsureNotDeleted();
+
             if (State == TaskState.Completed)
                 throw new InvalidOperationException("Cannot mark a completed task as InProgress");
 
@@ -60,10 +70,18 @@ namespace TaskManagement.Domain.Entities
 
         public void MarkCompleted()
         {
+            EnsureNotDeleted();
+
             if (State == TaskState.Completed)
                 throw new InvalidOperationException("Task is already completed");
 
             State = TaskState.Completed;
+        }
+
+        private void EnsureNotDeleted()
+        {
+            if (IsDeleted)
+                throw new InvalidOperationException("Task is deleted");
         }
     }
 }

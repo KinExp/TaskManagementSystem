@@ -66,28 +66,24 @@ namespace TaskManagement.Application.Services
         public async Task UpdateAsync(
             Guid userId,
             Guid taskId,
-            string? title,
-            string? description,
-            TaskPriority? priority,
-            DateTime? deadline)
+            UpdateTaskDto dto)
         {
             var task = await _taskRepository.GetByIdAsync(taskId, userId);
             if (task == null)
                 throw new NotFoundException("Task not found");
 
-            if (!string.IsNullOrWhiteSpace(title))
-                task.UpdateTitle(title);
+            if (!string.IsNullOrWhiteSpace(dto.Title))
+                task.UpdateTitle(dto.Title);
 
-            if (description != null)
-                task.UpdateDescription(description);
+            if (dto.Description != null)
+                task.UpdateDescription(dto.Description);
 
-            if (priority.HasValue)
-                task.UpdatePriority(priority.Value);
+            if (dto.Priority.HasValue)
+                task.UpdatePriority(dto.Priority.Value);
 
-            if (deadline.HasValue)
-                task.UpdateDeadline(deadline.Value);
+            if (dto.Deadline.HasValue)
+                task.UpdateDeadline(dto.Deadline.Value);
 
-            await _taskRepository.UpdateAsync(task);
             await _taskRepository.SaveChangesAsync();
         }
 

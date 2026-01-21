@@ -102,21 +102,18 @@ namespace TaskManagement.Infrastructure.Data
             {
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.CreatedAt = utcNow;
-                    entry.Entity.CreatedBy = currentUserId;
+                    entry.Entity.MarkCreated(utcNow, currentUserId);
                 }
                 else if (entry.State == EntityState.Modified)
                 {
-                    entry.Entity.UpdatedAt = utcNow;
-                    entry.Entity.UpdatedBy = currentUserId;
+                    entry.Entity.MarkUpdated(utcNow, currentUserId);
                 }
 
                 if (entry.Entity is TaskItem task)
                 {
                     if (task.IsDeleted && task.DeletedAt == null)
                     {
-                        task.DeletedAt = utcNow;
-                        task.DeletedBy = currentUserId;
+                        task.MarkDeleted(utcNow, currentUserId);
                     }
                 }
             }

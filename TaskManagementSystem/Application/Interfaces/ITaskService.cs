@@ -17,13 +17,7 @@ namespace TaskManagement.Application.Interfaces
             int skip = 0,
             int take = 20);
 
-        Task UpdateAsync(
-            Guid userId,
-            Guid taskId,
-            string? title,
-            string? description,
-            TaskPriority? priority,
-            DateTime? deadline);
+        Task UpdateAsync(Guid userId, Guid taskId, UpdateTaskDto dto);
         Task DeleteAsync(Guid userId, Guid taskId);
 
         Task MarkInProgressAsync(Guid userId, Guid taskId);

@@ -6,6 +6,7 @@ using TaskManagement.Domain.Enums;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using FluentValidation;
+using FluentValidation.Results;
 
 namespace TaskManagement.Api.Controllers
 {
@@ -16,16 +17,19 @@ namespace TaskManagement.Api.Controllers
     {
         private readonly ITaskService _taskService;
         private readonly IValidator<CreateTaskDto> _createValidator;
+        private readonly IValidator<UpdateTaskDto> _updateValidator;
         private readonly IAuthorizationService _authorizationService;
 
         public TasksController(
             ITaskService taskService,
             IValidator<CreateTaskDto> createValidator,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            IValidator<UpdateTaskDto> updateValidator)
         {
             _taskService = taskService;
             _createValidator = createValidator;
             _authorizationService = authorizationService;
+            _updateValidator = updateValidator;
         }
 
         private Guid GetUserId()
@@ -105,7 +109,7 @@ namespace TaskManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(
             Guid taskId,
-            [FromBody] CreateTaskDto dto)
+            [FromBody] UpdateTaskDto dto)
         {
             await ValidateAsync(dto);
 
@@ -119,13 +123,7 @@ namespace TaskManagement.Api.Controllers
             if (!authResult.Succeeded)
                 return Forbid();
 
-            await _taskService.UpdateAsync(
-                task.UserId,
-                taskId,
-                dto.Title,
-                dto.Description,
-                dto.Priority,
-                dto.Deadline);
+            await _taskService.UpdateAsync(task.UserId, taskId, dto);
 
             return NoContent();
         }
@@ -215,7 +213,17 @@ namespace TaskManagement.Api.Controllers
         private async Task ValidateAsync(CreateTaskDto dto)
         {
             var result = await _createValidator.ValidateAsync(dto);
+            ThrowIfInvalid(result);
+        }
 
+        private async Task ValidateAsync(UpdateTaskDto dto)
+        {
+            var result = await _updateValidator.ValidateAsync(dto);
+            ThrowIfInvalid(result);
+        }
+
+        private static void ThrowIfInvalid(ValidationResult result)
+        {
             if (!result.IsValid)
             {
                 var message = string.Join("; ",
