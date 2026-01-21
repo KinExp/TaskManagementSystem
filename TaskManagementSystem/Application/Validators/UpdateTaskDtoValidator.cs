@@ -8,6 +8,9 @@ namespace TaskManagement.Application.Validators
         public UpdateTaskDtoValidator()
         {
             RuleFor(x => x.Title)
+                .Cascade(CascadeMode.Stop)
+                .Must(title => title == null || !string.IsNullOrWhiteSpace(title))
+                .WithMessage("Title cannot be empty")
                 .MaximumLength(200)
                 .WithMessage("Title must be less than 200 characters");
 
