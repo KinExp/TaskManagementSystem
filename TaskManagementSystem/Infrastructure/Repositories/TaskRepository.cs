@@ -32,62 +32,16 @@ namespace TaskManagement.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
         }
 
-        public async Task<IReadOnlyList<TaskItem>> GetByUserAsync(Guid userId)
+        public IQueryable<TaskItem> QueryByUser(Guid userId)
         {
-            return await _context.Tasks
-                .Where(t => t.UserId == userId)
-                .ToListAsync();
+            return _context.Tasks
+                .Where(t => t.UserId == userId);
         }
 
-        public async Task<IReadOnlyList<TaskItem>> GetByUserAsync(
-            Guid userId,
-            TaskState? state,
-            TaskPriority? priority,
-            string? search,
-            TaskSortOption sort,
-            int skip,
-            int take)
+        public async Task<IReadOnlyList<TaskItem>> ExecuteAsync(
+            IQueryable<TaskItem> query)
         {
-            var query = _context.Tasks.Where(t => t.UserId == userId);
-
-            if (state.HasValue)
-                query = query.Where(t => t.State == state.Value);
-
-            if (priority.HasValue)
-                query = query.Where(t => t.Priority == priority.Value);
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var normalized = search.Trim().ToLower();
-
-                query = query.Where(t =>
-                    t.Title.ToLower().Contains(normalized));
-            }
-
-            query = sort switch
-            {
-                TaskSortOption.CreatedAtAsc => query.OrderBy(t => t.CreatedAt),
-                TaskSortOption.PriorityAsc => query.OrderBy(t => t.Priority),
-                TaskSortOption.PriorityDesc => query.OrderBy(t => t.Priority),
-                _ => query.OrderByDescending(t => t.CreatedAt)
-            };
-
-            return await query
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync();
-        }
-
-        public async Task UpdateAsync(TaskItem task)
-        {
-            _context.Tasks.Update(task);
-            await Task.CompletedTask;
-        }
-
-        public async Task RemoveAsync(TaskItem task)
-        {
-            _context.Tasks.Remove(task);
-            await Task.CompletedTask;
+            return await query.ToListAsync();
         }
 
         public async Task SaveChangesAsync()

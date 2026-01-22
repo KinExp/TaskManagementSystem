@@ -8,18 +8,8 @@ namespace TaskManagement.Application.Interfaces.Repositories
         Task AddAsync(TaskItem task);
         Task<TaskItem?> GetByIdAsync(Guid taskId);
         Task<TaskItem?> GetByIdAsync(Guid taskId, Guid userId);
-        Task<IReadOnlyList<TaskItem>> GetByUserAsync(Guid userId);
-        Task<IReadOnlyList<TaskItem>> GetByUserAsync(
-            Guid userId,
-            TaskState? state,
-            TaskPriority? priority,
-            string? search,
-            TaskSortOption sort,
-            int skip,
-            int take);
-
-        Task UpdateAsync(TaskItem task);
-        Task RemoveAsync(TaskItem task);
+        IQueryable<TaskItem> QueryByUser(Guid userId);
+        Task<IReadOnlyList<TaskItem>> ExecuteAsync(IQueryable<TaskItem> query);
         Task SaveChangesAsync();
     }
 }

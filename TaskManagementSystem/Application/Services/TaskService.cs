@@ -33,7 +33,9 @@ namespace TaskManagement.Application.Services
 
         public async Task<IReadOnlyList<TaskDto>> GetByUserAsync(Guid userId)
         {
-            var tasks = await _taskRepository.GetByUserAsync(userId);
+            var query = _taskRepository.QueryByUser(userId);
+
+            var tasks = await _taskRepository.ExecuteAsync(query);
 
             return tasks
                 .Select(MapToDto)
@@ -49,14 +51,31 @@ namespace TaskManagement.Application.Services
             int skip = 0,
             int take = 20)
         {
-            var tasks = await _taskRepository.GetByUserAsync(
-                userId,
-                state,
-                priority,
-                search,
-                sort,
-                skip,
-                take);
+            var query = _taskRepository.QueryByUser(userId);
+
+            if (state.HasValue)
+                query = query.Where(t => t.State == state.Value);
+
+            if (priority.HasValue)
+                query = query.Where(t => t.Priority == priority.Value);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalized = search.Trim().ToLower();
+                query = query.Where(t =>
+                    t.Title.ToLower().Contains(normalized));
+            }
+
+            query = sort switch
+            {
+                TaskSortOption.CreatedAtAsc => query.OrderBy(t => t.CreatedAt),
+                TaskSortOption.PriorityAsc => query.OrderBy(t => t.Priority),
+                TaskSortOption.PriorityDesc => query.OrderByDescending(t => t.Priority),
+                _ => query.OrderByDescending(t => t.CreatedAt)
+            };
+
+            var tasks = await _taskRepository.ExecuteAsync(
+                query.Skip(skip).Take(take));
 
             return tasks
                 .Select(MapToDto)
